@@ -1,0 +1,226 @@
+\documentclass[unicode]{beamer}
+\usepackage{cmap}
+%\usepackage{textpos}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{wrapfig}
+\graphicspath{{pictures/}}
+
+\usetheme{Madrid}
+%\affil{Московский государственный технический университет имени Н.Э. Баумана (национальный исследовательский университет)}
+
+
+\title{Семантическая сегментация изображений рыб}
+
+%\author{\spacedlowsmallcaps{John Smith* \& James Smith\textsuperscript{1}} \\
+	%	\spacedlowsmallcaps{John Smith* \& James Smith\textsuperscript{1}}}
+\author{Студент группы ФН12-71Б: А.А. Сысоев \\ Научный руководитель: Д.А. Фетисов}
+
+\date{Москва, 2025 г.}
+
+%\institute{Московский государственный технический университет имени Н.Э. Баумана (национальный исследовательский университет)}
+
+
+%\logo{\includegraphics[width=1cm]{emblema.pdf}}
+
+
+
+\begin{document}
+	
+	\begin{frame}
+		
+		%\begin{wrapfigure}{l}{0.1\textwidth}
+		%	\includegraphics[scale=0.05]{emblema.pdf}
+		%\end{wrapfigure}
+		%{\text{ }\\\footnotesize Московский государственный технический университет\\ имени Н.Э. Баумана (национальный исследовательский университет)}
+		
+		\noindent\begin{minipage}{0.1\textwidth}
+			\includegraphics[scale=0.06]{emblema.pdf}
+		\end{minipage}%
+		\hfill%
+		\begin{minipage}{0.9\textwidth}\centering
+			{\small Московский государственный технический университет\\ имени Н.Э. Баумана (национальный исследовательский университет)}
+		\end{minipage}
+		
+		\maketitle
+		
+	\end{frame}
+	
+	%\section{\centering{Постановка задачи}}
+	
+	
+	\begin{frame}[t]{Постановка задачи}
+		\begin{block}{Цель работы:}
+			разработка и обучение модели нейронной сети, способной решать задачу семантической сегментации изображении рыб
+		\end{block}
+		
+		\begin{block}{Задачи:}
+			\begin{enumerate}
+				\item Исследование архитектуры нейронной сети U-net.
+				\item  Подготовка и предварительная обработка набора изображений.
+				\item Обучение модели на выбранном датасете.
+				\item Оценка качества работы модели с использованием различных метрик.
+				\item Анализ полученных результатов.
+			\end{enumerate}	
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[t]{\large Семантическая сегментация}
+		\textbf{Семантическая сегментация} – попиксельная разметка изображения, где каждая метка соответствует определенному  классу объекта.
+		Для формализации введем следующие  обозначения:
+		\begin{itemize}
+			\item $X = \{x_i\}_{i=1}^{N}$ — множество пикселей входного изображения;
+			\item $Y = \{y_i\}_{i=1}^{N}$ — множество истинных меток пикселей;
+			\item $\hat{Y} = \{\hat{y}_i\}_{i=1}^{N}$ — множество предсказанных меток;
+			\item $y_i, \hat{y}_i \in \{0,1\}, \quad i = 1, \ldots, N$.
+		\end{itemize}	
+		Задача семантической сегментации заключается в нахождении такого отображения
+		\begin{equation}
+			f_\theta : X \rightarrow \hat{Y},
+		\end{equation}
+		где $f_\theta$ — нейронная сеть с параметрами $\theta$, которая для каждого пикселя входного изображения предсказывает его принадлежность к соответствующему классу.
+		Обучение модели сводится к подбору параметров $\theta$, минимизирующих функцию потерь между предсказанными метками $\hat{Y}$ и истинной разметкой $Y$ на обучающей выборке.
+		
+	\end{frame}
+	
+	
+	
+	\begin{frame}[t]{\large Архитектура  сверточной нейронной сети U-net}
+		
+		\begin{figure}[H]
+			\centering{\includegraphics[scale=0.45]{unet.png}}
+		\end{figure}
+	\end{frame}
+	
+	
+	
+	\begin{frame}[t]{\large Подготовка данных}
+		\begin{itemize}
+			\item  Датасет  состоит из 9000 пар изображений рыб и бинарных масок (9 классов).
+			\item Исходное разрешение изображений: $590 \times 445$ пикселей.
+			\item Приведение всех изображений и масок к фиксированному размеру $224 \times 224$.
+			\item Преобразование изображений в тензоры и нормализация по каналам RGB (статистика ImageNet).
+			\item Масштабирование масок с использованием интерполяции ближайшего соседа.
+			\item Деление на обучающую, валидационную и тестовую выборки.
+		\end{itemize}
+	\end{frame}
+	
+	
+	\begin{frame}[t]{\large Метрики оценки качества модели}
+		\begin{itemize}
+			\item Accuracy — доля правильно классифицированных пикселей.
+			\item Основана на элементах матрицы ошибок:
+			\begin{itemize}
+				\item $TP$ — верно предсказанный объект;
+				\item $TN$ — верно предсказанный фон;
+				\item $FP$ — ложный объект;
+				\item $FN$ — пропущенный объект.
+			\end{itemize}
+			\item Формула:
+			\begin{equation*}
+				\mathrm{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+			\end{equation*}
+			\item \textbf{Плюсы:} простая и интуитивная метрика.
+			\item \textbf{Минусы:} может быть завышена при дисбалансе классов (преобладание фона).
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}[t]{\large Метрики оценки качества модели}
+		\begin{itemize}
+			\item Intersection over Union (IoU) — основная метрика качества в задачах семантической сегментации.
+			
+			\item \textbf{Геометрическое определение:}
+			\begin{equation*}
+				\mathrm{IoU} = \frac{A \cap B}{A \cup B}
+			\end{equation*}
+			где:
+			\begin{itemize}
+				\item $A$ — множество пикселей истинной маски;
+				\item $B$ — множество пикселей, предсказанных моделью.
+			\end{itemize}
+			
+			\item \textbf{Определение через матрицу ошибок:}
+			\begin{equation*}
+				\mathrm{IoU} = \frac{TP}{TP + FP + FN}
+			\end{equation*}
+			
+			\item Метрика не учитывает истинно отрицательные пиксели ($TN$), что делает её устойчивой к дисбалансу классов.
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}[t]{\large Функция потерь Dice Loss}
+		\begin{itemize}
+			\item Dice Loss — функция потерь, используемая в задачах семантической сегментации.
+			
+			\item Основана на коэффициенте Dice, который оценивает степень совпадения предсказанной и истинной масок.
+			
+			\item Предсказания модели преобразуются в вероятности с помощью сигмоидной функции.
+			
+			\item Элементы, используемые в формуле:
+			\begin{itemize}
+				\item $TP = \sum_i p_i y_i$ — корректно предсказанные пиксели объекта;
+				\item $FP = \sum_i p_i (1 - y_i)$ — пиксели, ошибочно отнесённые к объекту;
+				\item $FN = \sum_i (1 - p_i) y_i$ — пиксели объекта, не распознанные моделью.
+			\end{itemize}
+			
+			\item Формула коэффициента Dice:
+			\begin{equation*}
+				\mathrm{Dice} = \frac{2TP}{2TP + FP + FN }
+			\end{equation*}
+			
+			\item Функция потерь:
+			\begin{equation*}
+				\mathcal{L}_{Dice} = 1 - \mathrm{Dice}
+			\end{equation*}
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}[t]{\large Обучение модели}
+		
+		\begin{figure}[H]
+			\centering{\includegraphics[scale=0.45]{metricsloss.png}}
+		\end{figure}
+	\end{frame}
+	
+	\begin{frame}[t]{\large Визуализация}
+		
+		\begin{figure}[H]
+			\centering{\includegraphics[scale=0.26]{test.png}}
+		\end{figure}
+	\end{frame}
+	
+	
+	
+	\begin{frame}[t]{\large Результаты}
+		\begin{itemize}
+			\item Достигнутая точность по пикселям (Accuracy): \(\sim 98.6\%\)
+			\item Коэффициент перекрытия масок (IoU): \(\sim 91.6\%\)
+			\item Графики потерь и метрик показывают стабильное обучение без признаков переобучения
+			\item Модель успешно сегментирует изображения рыб и корректно выделяет границы объектов
+			\item Возможности для улучшения:
+			\begin{itemize}
+				\item добавить Dropout и Batch Normalization
+				\item увеличить размер обучающей выборки
+			\end{itemize}
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}[t]{\large Выводы}
+		\begin{itemize}
+			\item Удалось разработать и обучить модель для задачи семантической сегментации изображений рыб
+			\item Подтверждена эффективность сверточных нейронных сетей (U-Net) в задачах сегментации объектов на изображениях
+			\item Предложены направления дальнейшей работы
+			
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}[t]
+		\text{ }\\\text{ }\\\text{ }\\\text{ }\\\text{ }\\\text{ }\\\text{ }\\\text{ }\\
+		\center{\LARGE{Спасибо за внимание!}}
+	\end{frame}
+	
+	
+\end{document}
